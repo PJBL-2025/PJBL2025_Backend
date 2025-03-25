@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
+    "migrate": "prisma migrate dev",
     "build": "tsc",
     "start:dist": "node dist/src/index.js",
     "lint": "eslint --fix src test",

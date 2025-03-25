@@ -12,3 +12,46 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+enum Size {
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+model products {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  quantity         Int
+  price            Int
+  weight           Int
+  size             Size
+  product_images   product_images[]
+  product_category product_category[]
+}
+
+model product_images {
+  id         Int    @id @default(autoincrement())
+  image      String
+  product_id Int
+
+  product products @relation(fields: [product_id], references: [id])
+}
+
+model product_category {
+  id          Int @id @default(autoincrement())
+  product_id  Int
+  category_id Int
+
+  product  products   @relation(fields: [product_id], references: [id])
+  category categories @relation(fields: [category_id], references: [id])
+}
+
+model categories {
+  id               Int                @id @default(autoincrement())
+  category         String
+  product_category product_category[]
+}
