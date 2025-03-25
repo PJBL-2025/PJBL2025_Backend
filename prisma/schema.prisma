@@ -12,3 +12,112 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  user
+  admin
+}
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum Status {
+  pending
+  success
+  cancel
+}
+
+model users {
+  id       Int    @id @default(autoincrement())
+  role     Role   @default(user)
+  name     String
+  username String @unique
+  password String
+
+  address  addresses[]
+  checkout checkouts[]
+}
+
+model addresses {
+  id               Int    @id @default(autoincrement())
+  address          String
+  zip_code         Int
+  destination_code String
+  receiver_area    String
+  user_id          Int
+
+  checkout checkouts[]
+
+  user users @relation(fields: [user_id], references: [id])
+}
+
+model products {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  quantity    Int
+  price       Int
+  weight      Int
+  size        Size
+
+  product_images   product_images[]
+  product_category product_category[]
+  checkout         checkouts[]
+}
+
+model product_images {
+  id         Int    @id @default(autoincrement())
+  image      String
+  image_path String
+  product_id Int
+
+  product products @relation(fields: [product_id], references: [id])
+}
+
+model product_category {
+  id          Int @id @default(autoincrement())
+  product_id  Int
+  category_id Int
+
+  product  products   @relation(fields: [product_id], references: [id])
+  category categories @relation(fields: [category_id], references: [id])
+}
+
+model categories {
+  id       Int    @id @default(autoincrement())
+  category String
+
+  product_category product_category[]
+}
+
+model checkouts {
+  id         Int      @id @default(autoincrement())
+  status     Status   @default(pending)
+  quantity   Int
+  user_id    Int
+  address_id Int
+  product_id Int
+  created_at DateTime @default(now())
+
+  delivery deliveries?
+
+  user    users     @relation(fields: [user_id], references: [id])
+  address addresses @relation(fields: [address_id], references: [id])
+  product products  @relation(fields: [product_id], references: [id])
+}
+
+model deliveries {
+  id              Int      @id @default(autoincrement())
+  order_id        String   @unique
+  send_start_time DateTime
+  send_end_time   DateTime
+  checkout_id     Int      @unique
+
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
+}
