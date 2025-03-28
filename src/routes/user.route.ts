@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { getAllUser, getOneUser, updateUser } from '../controllers/user.controller';
+import { adminAuth, authorize, restrictToSelf } from '../middlewares/auth.middleware';
 
 const userRoute = Router();
 
-userRoute.get('/', getAllUser);
-userRoute.get('/:id', getOneUser);
-userRoute.patch('/:id', updateUser);
+userRoute.get('/', authorize, adminAuth, getAllUser);
+userRoute.get('/:id', authorize, getOneUser);
+userRoute.patch('/:id', authorize, restrictToSelf, updateUser);
 
 export default userRoute;

@@ -19,6 +19,9 @@ export const getAllUser = async (req: Request, res: Response, next: NextFunction
 export const getOneUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = parseInt(req.params.id);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
 
     const user = await prismaClient.users.findUnique({
       where: { id: userId },
@@ -39,27 +42,28 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const userId = parseInt(req.params.id);
     const { name, username, password } = req.body;
 
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+
     const user = await prismaClient.users.findFirst({
-      where: {
-        username,
-        id: { not: userId },
-      },
+      where: { username },
     });
 
-    if (user) {
+    if (user && user.id !== userId) {
       return next(new BadRequestException('Username sudah ada', ErrorCode.USER_ALREADY_EXISTS));
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
+    let updatedData: any = { name, username };
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updatedData.password = await bcrypt.hash(password, salt);
+    }
 
     await prismaClient.users.update({
       where: { id: userId },
-      data: {
-        name,
-        username,
-        password: hashPassword,
-      },
+      data: updatedData,
     });
 
     res.json({ status: 'success', message: 'data user berhasil di edit' });
