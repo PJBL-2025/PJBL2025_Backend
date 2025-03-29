@@ -51,7 +51,7 @@ export const signIn = async (req: Request, res: Response, next: NextFunction) =>
     });
 
     if (!user) {
-      return  next(new BadRequestException('User not found', ErrorCode.USER_NOT_FOUND));
+      return next(new BadRequestException('User not found', ErrorCode.USER_NOT_FOUND));
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -60,7 +60,7 @@ export const signIn = async (req: Request, res: Response, next: NextFunction) =>
       return next(new BadRequestException('Invalid Password', ErrorCode.INCORRECT_PASSWORD));
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET as string);
+    const token = jwt.sign([{ userId: user.id }, { role: user.role }], JWT_SECRET as string);
     res.json({
       message: 'success',
       token: token,
