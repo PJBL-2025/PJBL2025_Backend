@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import bcrypt from 'bcryptjs';
-
-const prismaClient = new PrismaClient();
+import { prismaClient } from '../utils/db';
 
 export const getAllUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await prismaClient.users.findMany({});
+    const users = await prismaClient.users.findMany({
+      select: {
+        name: true,
+        username: true,
+        address: true,
+      },
+    });
 
     res.json({ status: 'success', data: users });
   } catch (err) {
@@ -18,13 +22,18 @@ export const getAllUser = async (req: Request, res: Response, next: NextFunction
 
 export const getOneUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.user_id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: 'Invalid user ID' });
     }
 
     const user = await prismaClient.users.findUnique({
       where: { id: userId },
+      select: {
+        name: true,
+        username: true,
+        address: true,
+      },
     });
 
     if (!user) {
@@ -39,7 +48,7 @@ export const getOneUser = async (req: Request, res: Response, next: NextFunction
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.user_id);
     const { name, username, password } = req.body;
 
     if (isNaN(userId)) {

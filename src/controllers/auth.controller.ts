@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
-
-const prismaClient = new PrismaClient();
+import { prismaClient } from '../utils/db';
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
   try {

@@ -1,10 +1,8 @@
 import { Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env';
-import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/AuthRequest';
-
-const prismaClient = new PrismaClient();
+import { prismaClient } from '../utils/db';
 
 const authorize = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -38,7 +36,7 @@ const authorize = async (req: AuthRequest, res: Response, next: NextFunction) =>
 };
 
 const restrictToSelf = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  if ( req.user?.role !== 'admin' && req.user?.id !== parseInt(req.params.id)) {
+  if ( req.user?.role !== 'admin' && req.user?.id !== parseInt(req.params.user_id)) {
     return res.status(403).json({ message: 'Forbidden: You can only access your own account' });
   }
   next();

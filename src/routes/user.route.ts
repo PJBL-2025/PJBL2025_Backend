@@ -5,7 +5,7 @@ import { adminAuth, authorize, restrictToSelf } from '../middlewares/auth.middle
 const userRoute = Router();
 
 userRoute.get('/', authorize, adminAuth, getAllUser);
-userRoute.get('/:id', authorize, restrictToSelf, getOneUser);
-userRoute.patch('/:id', authorize, restrictToSelf, updateUser);
+userRoute.get('/:user_id', authorize, restrictToSelf, getOneUser);
+userRoute.patch('/:user_id', authorize, restrictToSelf, updateUser);
 
 export default userRoute;
