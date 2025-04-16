@@ -7,7 +7,9 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const products = await prismaClient.products.findMany({
       include: {
-        product_category: true,
+        product_category: {
+          include: { category: true },
+        },
         product_images: true,
       },
     });
@@ -25,7 +27,9 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
     const products = await prismaClient.products.findUnique({
       where: { id: productId },
       include: {
-        product_category: true,
+        product_category: {
+          include: { category: true },
+        },
         product_images: true,
       },
     });
@@ -70,7 +74,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const productId = parseInt(req.params.id);
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, size, product_images } = req.body;
+    const { name, description, quantity, price, weight, size, product_images, categoryIds } = req.body;
 
     if (product_images) {
       if (!Array.isArray(product_images)) {
@@ -87,10 +91,22 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         price,
         weight,
         size,
+
+        product_category: {
+          deleteMany: {},
+          create: categoryIds.map((ids: number) => ({
+            category: {
+              connect: { id: ids },
+            },
+          })),
+        },
       },
 
       include: {
         product_images: true,
+        product_category: {
+          include: { category: true },
+        },
       },
     });
 
