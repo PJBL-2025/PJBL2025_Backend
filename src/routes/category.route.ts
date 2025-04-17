@@ -6,13 +6,14 @@ import {
   getOneCategory,
   updateCategory,
 } from '../controllers/category.controller';
+import { adminAuth, authorize } from '../middlewares/auth.middleware';
 
 const categoryRoute = Router();
 
 categoryRoute.get('/', getCategory);
 categoryRoute.get('/:slug', getOneCategory);
-categoryRoute.post('/', createCategory);
-categoryRoute.patch('/:id', updateCategory);
-categoryRoute.delete('/:id', deleteCategory);
+categoryRoute.post('/', authorize, adminAuth, createCategory);
+categoryRoute.patch('/:id', authorize, adminAuth, updateCategory);
+categoryRoute.delete('/:id', authorize, adminAuth, deleteCategory);
 
 export default categoryRoute;
