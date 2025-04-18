@@ -55,14 +55,16 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       return res.status(400).json({ message: 'Invalid user ID' });
     }
 
-    const user = await prismaClient.users.findFirst({
-      where: { username },
-    });
+    if (username) {
+      const user = await prismaClient.users.findFirst({
+        where: { username },
+      });
 
-    if (user && user.id !== userId) {
-      return next(new BadRequestException('Username sudah ada', ErrorCode.USER_ALREADY_EXISTS));
+      if (user && user.id !== userId) {
+        return next(new BadRequestException('Username sudah ada', ErrorCode.USER_ALREADY_EXISTS));
+      }
     }
-
+  
     let updatedData: any = { name, username };
 
     if (password) {
