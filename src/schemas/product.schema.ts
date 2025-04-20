@@ -9,5 +9,5 @@ export const productSchema = z.object({
   size: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']),
 
   product_images: z.array(z.string().url('URL gambar tidak valid')).optional(),
-  product_category: z.array(z.string()).nonempty('setidaknya harus terdapat 1 kategori '),
+  product_category: z.array(z.number()).nonempty('setidaknya harus terdapat 1 kategori '),
 });

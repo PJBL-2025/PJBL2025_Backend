@@ -3,6 +3,7 @@ import { prismaClient } from '../utils/db';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import { ErrorCode } from '../exceptions/http.exception';
 
+
 export const getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await prismaClient.products.findMany({
@@ -43,9 +44,10 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, size, product_images } = req.body;
+    const { name, description, quantity, price, weight, size, categoryIds } = req.body;
+    const files = req.files as Express.Multer.File[];
 
-    if (!Array.isArray(product_images)) {
+    if (!files || files.length === 0) {
       return res.status(400).json({ success: false, message: 'Invalid product images' });
     }
 
@@ -53,14 +55,32 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       data: {
         name,
         description,
-        quantity,
-        price,
-        weight,
+        quantity: parseInt(quantity),
+        price: parseInt(price),
+        weight: parseInt(weight),
         size,
+
+        product_images: {
+          create: files.map((file) => ({
+            image: file.originalname,
+            image_path: file.path,
+          })),
+        },
+
+        product_category: {
+          create: categoryIds.map((ids: number) => ({
+            category: {
+              connect: { id: ids },
+            },
+          })),
+        },
       },
 
       include: {
         product_images: true,
+        product_category: {
+          include: { category: true },
+        },
       },
     });
 
@@ -74,13 +94,8 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const productId = parseInt(req.params.id);
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, size, product_images, categoryIds } = req.body;
-
-    if (product_images) {
-      if (!Array.isArray(product_images)) {
-        return res.status(400).json({ success: false, message: 'Invalid product images' });
-      }
-    }
+    const { name, description, quantity, price, weight, size, categoryIds } = req.body;
+    const files = req.files as Express.Multer.File[];
 
     await prismaClient.products.update({
       where: { id: productId },
@@ -91,6 +106,13 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         price,
         weight,
         size,
+
+        product_images: {
+          create: files.map((file) => ({
+            image: file.originalname,
+            image_path: file.path,
+          })),
+        },
 
         product_category: {
           deleteMany: {},

@@ -91,7 +91,7 @@ model product_category {
 
 model categories {
   id       Int    @id @default(autoincrement())
-  category String
+  category String @unique
 
   product_category product_category[]
 }

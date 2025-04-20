@@ -13,15 +13,12 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-// ======================= ALERT =====================
-// disini karena seharusnya category adalah sebuah unique, maka nanti yang dikomen adalah seharusnya yang digunakan setelah nanti tipe datanya diganti
 
 export const getOneCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const category = req.params.slug;
 
-    // const categoryData = await prismaClient.categories.findUnique({
-    const categoryData = await prismaClient.categories.findFirst({
+    const categoryData = await prismaClient.categories.findUnique({
       where: { category: category },
       include: {
         product_category: {
@@ -54,13 +51,11 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
 export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // const categoryId = req.params.slug;
-    const categoryId = parseInt(req.params.id);
+    const categoryId = req.params.slug;
     const { category } = req.body;
 
     await prismaClient.categories.update({
-      // where: { category: categoryId },
-      where: { id: categoryId },
+      where: { category: categoryId },
       data: { category },
     });
 
@@ -72,12 +67,10 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
 
 export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // const categoryId = req.params.slug;
-    const categoryId = parseInt(req.params.id);
+    const categoryId = req.params.slug;
 
     await prismaClient.categories.delete({
-      // where: { category: categoryId },
-      where: { id: categoryId },
+      where: { category: categoryId },
     });
 
     res.json({ success: true, message: 'Category deleted' });
