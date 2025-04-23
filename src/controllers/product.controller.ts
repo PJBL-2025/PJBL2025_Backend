@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prismaClient } from '../utils/db';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
-import { ErrorCode } from '../exceptions/http.exception';
+import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
 
 
 export const getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
@@ -46,10 +46,21 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { name, description, quantity, price, weight, size, categoryIds } = req.body;
     const files = req.files as Express.Multer.File[];
+    let ids: number[] = [];
 
     if (!files || files.length === 0) {
       return res.status(400).json({ success: false, message: 'Invalid product images' });
     }
+
+
+    if (Array.isArray(categoryIds)) {
+      ids = categoryIds.map((id: string) => parseInt(id));
+    } else if (typeof categoryIds === 'string') {
+      ids = [parseInt(categoryIds)];
+    } else {
+      return next(new BadRequestException('Category harus berupa string atau array', ErrorCode.UNPROCESSABLE_ENTITY));
+    }
+
 
     await prismaClient.products.create({
       data: {
@@ -68,9 +79,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         },
 
         product_category: {
-          create: categoryIds.map((ids: number) => ({
+          create: ids.map((id: number) => ({
             category: {
-              connect: { id: ids },
+              connect: { id: id },
             },
           })),
         },
