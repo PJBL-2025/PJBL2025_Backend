@@ -58,7 +58,7 @@ export const signIn = async (req: Request, res: Response, next: NextFunction) =>
       return next(new BadRequestException('Invalid Password', ErrorCode.INCORRECT_PASSWORD));
     }
 
-    const token = jwt.sign([{ userId: user.id }, { role: user.role }], JWT_SECRET as string);
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET as string);
     res.json({
       message: 'success',
       token: token,

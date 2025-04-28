@@ -44,7 +44,7 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, size, categoryIds } = req.body;
+    const { name, description, quantity, price, weight, categoryIds } = req.body;
     const files = req.files as Express.Multer.File[];
     let ids: number[] = [];
 
@@ -69,7 +69,6 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         quantity: parseInt(quantity),
         price: parseInt(price),
         weight: parseInt(weight),
-        size,
 
         product_images: {
           create: files.map((file) => ({
@@ -105,7 +104,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const productId = parseInt(req.params.id);
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, size, categoryIds } = req.body;
+    const { name, description, quantity, price, weight, categoryIds } = req.body;
     const files = req.files as Express.Multer.File[];
 
     await prismaClient.products.update({
@@ -116,7 +115,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         quantity,
         price,
         weight,
-        size,
 
         product_images: {
           create: files.map((file) => ({
