@@ -83,7 +83,6 @@ model products {
 
 model product_images {
   id         Int    @id @default(autoincrement())
-  image      String
   image_path String
   product_id Int
 
@@ -117,7 +116,7 @@ model product_size {
 
 model size {
   id           Int            @id @default(autoincrement())
-  size         String
+  size         Size           @unique
   product_size product_size[]
 }
 
@@ -140,20 +139,21 @@ model product_custom {
   id               Int    @id @default(autoincrement())
   front_image_path String
   back_image_path  String
-  front_width      String
-  back_width       String
+  front_width      Int
+  back_width       Int
   product_id       Int    @unique
 
   custom product_checkout @relation(fields: [product_id], references: [id])
 }
 
 model checkouts {
-  id         Int      @id @default(autoincrement())
-  order_id   String   @unique
-  status     Status   @default(pending)
-  user_id    Int
-  address_id Int
-  created_at DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  order_id    String   @unique
+  status      Status   @default(pending)
+  total_price Int
+  user_id     Int
+  address_id  Int
+  created_at  DateTime @default(now())
 
   product_checkout product_checkout[]
   delivery         deliveries?

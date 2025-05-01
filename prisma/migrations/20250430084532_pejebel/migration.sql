@@ -38,7 +38,6 @@ CREATE TABLE `products` (
 -- CreateTable
 CREATE TABLE `product_images` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `image` VARCHAR(191) NOT NULL,
     `image_path` VARCHAR(191) NOT NULL,
     `product_id` INTEGER NOT NULL,
 
@@ -75,8 +74,9 @@ CREATE TABLE `product_size` (
 -- CreateTable
 CREATE TABLE `size` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `size` VARCHAR(191) NOT NULL,
+    `size` ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL') NOT NULL,
 
+    UNIQUE INDEX `size_size_key`(`size`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -99,8 +99,8 @@ CREATE TABLE `product_custom` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `front_image_path` VARCHAR(191) NOT NULL,
     `back_image_path` VARCHAR(191) NOT NULL,
-    `front_width` VARCHAR(191) NOT NULL,
-    `back_width` VARCHAR(191) NOT NULL,
+    `front_width` INTEGER NOT NULL,
+    `back_width` INTEGER NOT NULL,
     `product_id` INTEGER NOT NULL,
 
     UNIQUE INDEX `product_custom_product_id_key`(`product_id`),
@@ -112,6 +112,7 @@ CREATE TABLE `checkouts` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `order_id` VARCHAR(191) NOT NULL,
     `status` ENUM('pending', 'success', 'cancel') NOT NULL DEFAULT 'pending',
+    `total_price` INTEGER NOT NULL,
     `user_id` INTEGER NOT NULL,
     `address_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
