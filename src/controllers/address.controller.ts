@@ -2,12 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import { prismaClient } from '../utils/db';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
+import { AuthRequest } from '../types/AuthRequest';
 
-export const getAddressByUser = async (req: Request, res: Response, next: NextFunction) => {
+export const getAddressByUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.user_id);
+    const userId = req.user;
     const address = await prismaClient.addresses.findMany({
-      where: { user_id: userId },
+      where: { user_id: userId?.id },
     });
 
     if (!address || address.length === 0) {
@@ -20,12 +21,11 @@ export const getAddressByUser = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const createAddress = async (req: Request, res: Response, next: NextFunction) => {
+export const createAddress = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { address, zip_code, destination_code, receiver_area } = req.body;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const user_id = parseInt(req.params.user_id);
+    const userId = req.user;
 
     const addressData = await prismaClient.addresses.create({
       data: {
@@ -36,7 +36,7 @@ export const createAddress = async (req: Request, res: Response, next: NextFunct
 
         user: {
           connect: {
-            id: user_id,
+            id: userId?.id,
           },
         },
       },
@@ -48,15 +48,15 @@ export const createAddress = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateAddress = async (req: Request, res: Response, next: NextFunction) => {
+export const updateAddress = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const addressId = parseInt(req.params.id);
     const addressData = req.body;
 
-    const userId = parseInt(req.params.user_id);
+    const userId = req.user;
 
     const isAddress = await prismaClient.addresses.findFirst({
-      where: { id: addressId, user_id: userId },
+      where: { id: addressId, user_id: userId?.id },
     });
 
     if (!isAddress) {
@@ -74,14 +74,14 @@ export const updateAddress = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const deleteAddress = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteAddress = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const addressId = parseInt(req.params.id);
 
-    const userId = parseInt(req.params.user_id);
+    const userId = req.user;
 
     const isAddress = await prismaClient.addresses.findFirst({
-      where: { id: addressId, user_id: userId },
+      where: { id: addressId, user_id: userId?.id },
     });
 
     if (!isAddress) {

@@ -4,9 +4,9 @@ import { createAddress, deleteAddress, getAddressByUser, updateAddress } from '.
 
 const addressRoute = Router();
 
-addressRoute.get('/:user_id', authorize, restrictToSelf, getAddressByUser);
-addressRoute.post('/:user_id', authorize, createAddress);
-addressRoute.patch('/:user_id/:id', authorize, updateAddress);
-addressRoute.delete('/:user_id/:id', authorize, deleteAddress);
+addressRoute.get('/', authorize, restrictToSelf, getAddressByUser);
+addressRoute.post('/', authorize, createAddress);
+addressRoute.patch('/:id', authorize, updateAddress);
+addressRoute.delete('/:id', authorize, deleteAddress);
 
 export default addressRoute;

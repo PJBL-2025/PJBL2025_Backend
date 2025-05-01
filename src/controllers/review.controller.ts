@@ -22,6 +22,24 @@ export const getAllReview = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+export const getReviewByUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user;
+    const review = await prismaClient.review.findMany({
+      where: { user_id: userId?.id },
+      include: {
+        user: {
+          select: { id: true, name: true, username: true },
+        },
+      },
+    });
+
+    res.json({ success: true, data: review });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createReview = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { star, comment } = req.body;

@@ -3,7 +3,6 @@ import { prismaClient } from '../utils/db';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
 
-
 export const getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await prismaClient.products.findMany({
@@ -44,23 +43,30 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, categoryIds } = req.body;
+    const { name, description, quantity, price, weight, categoryIds, sizeIds } = req.body;
     const files = req.files as Express.Multer.File[];
-    let ids: number[] = [];
+    let categoriesid: number[] = [];
+    let sizeValue: string[] = [];
 
     if (!files || files.length === 0) {
       return res.status(400).json({ success: false, message: 'Invalid product images' });
     }
 
-
     if (Array.isArray(categoryIds)) {
-      ids = categoryIds.map((id: string) => parseInt(id));
+      categoriesid = categoryIds.map((id: string) => parseInt(id));
     } else if (typeof categoryIds === 'string') {
-      ids = [parseInt(categoryIds)];
+      categoriesid = [parseInt(categoryIds)];
     } else {
       return next(new BadRequestException('Category harus berupa string atau array', ErrorCode.UNPROCESSABLE_ENTITY));
     }
 
+    if (Array.isArray(sizeIds)) {
+      sizeValue = sizeIds;
+    } else if (typeof sizeIds === 'string') {
+      sizeValue = [sizeIds];
+    } else {
+      return next(new BadRequestException('Size harus berupa string atau array', ErrorCode.UNPROCESSABLE_ENTITY));
+    }
 
     await prismaClient.products.create({
       data: {
@@ -78,9 +84,17 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         },
 
         product_category: {
-          create: ids.map((id: number) => ({
+          create: categoriesid.map((id: number) => ({
             category: {
               connect: { id: id },
+            },
+          })),
+        },
+
+        product_size: {
+          create: sizeValue.map((size: string) => ({
+            size: {
+              connect: { size: size as any },
             },
           })),
         },
@@ -104,8 +118,26 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const productId = parseInt(req.params.id);
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { name, description, quantity, price, weight, categoryIds } = req.body;
+    const { name, description, quantity, price, weight, categoryIds, sizeIds } = req.body;
     const files = req.files as Express.Multer.File[];
+    let categoriesid: number[] = [];
+    let sizeValue: string[] = [];
+
+    if (Array.isArray(categoryIds)) {
+      categoriesid = categoryIds.map((id: string) => parseInt(id));
+    } else if (typeof categoryIds === 'string') {
+      categoriesid = [parseInt(categoryIds)];
+    } else {
+      return next(new BadRequestException('Category harus berupa string atau array', ErrorCode.UNPROCESSABLE_ENTITY));
+    }
+
+    if (Array.isArray(sizeIds)) {
+      sizeValue = sizeIds;
+    } else if (typeof sizeIds === 'string') {
+      sizeValue = [sizeIds];
+    } else {
+      return next(new BadRequestException('Size harus berupa string atau array', ErrorCode.UNPROCESSABLE_ENTITY));
+    }
 
     await prismaClient.products.update({
       where: { id: productId },
@@ -125,9 +157,18 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
 
         product_category: {
           deleteMany: {},
-          create: categoryIds.map((ids: number) => ({
+          create: categoriesid.map((ids: number) => ({
             category: {
               connect: { id: ids },
+            },
+          })),
+        },
+
+        product_size: {
+          deleteMany: {},
+          create: sizeValue.map((size: string) => ({
+            size: {
+              connect: { size: size as any },
             },
           })),
         },
