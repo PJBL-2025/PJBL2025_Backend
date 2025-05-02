@@ -11,6 +11,7 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
           include: { category: true },
         },
         product_images: true,
+        review: true,
       },
     });
 
@@ -31,6 +32,7 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
           include: { category: true },
         },
         product_images: true,
+        review: true,
       },
     });
 
@@ -105,6 +107,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         product_category: {
           include: { category: true },
         },
+        review: true,
       },
     });
 
@@ -179,6 +182,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         product_category: {
           include: { category: true },
         },
+        review: true,
       },
     });
 

@@ -77,7 +77,6 @@ model products {
   product_category product_category[]
   product_size     product_size[]
   product_checkout product_checkout[]
-  chats            chats[]
   review           review[]
 }
 
@@ -196,9 +195,7 @@ model chats {
   id         Int      @id @default(autoincrement())
   message    String
   user_id    Int
-  product_id Int
   created_at DateTime @default(now())
 
-  product products @relation(fields: [product_id], references: [id])
-  user    users    @relation(fields: [user_id], references: [id])
+  user users @relation(fields: [user_id], references: [id])
 }
