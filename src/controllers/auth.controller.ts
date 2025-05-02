@@ -29,7 +29,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
       },
     });
 
-    const token = jwt.sign({ userId: newUser.id }, JWT_SECRET as string);
+    const token = jwt.sign({ userId: newUser.id, role: newUser.role }, JWT_SECRET as string,);
 
     res.json({
       message: 'success',
