@@ -33,9 +33,10 @@ enum Type {
 }
 
 enum Status {
-  pending
-  success
-  cancel
+  pending 
+  processing 
+  success 
+  failed
 }
 
 model users {
@@ -152,6 +153,7 @@ model checkouts {
   total_price Int
   user_id     Int
   address_id  Int
+  snap_token String?
   created_at  DateTime @default(now())
 
   product_checkout product_checkout[]
@@ -163,17 +165,17 @@ model checkouts {
 
 model deliveries {
   id              Int      @id @default(autoincrement())
-  send_start_time DateTime
-  send_end_time   DateTime
+  send_start_time DateTime?
+  send_end_time   DateTime?
   checkout_id     Int      @unique
-  status          status[]
+  status          delivery_status[]
 
   checkout checkouts @relation(fields: [checkout_id], references: [id])
 }
 
-model status {
+model delivery_status {
   id            Int    @id @default(autoincrement())
-  status        String
+  status        String?
   deliveries_id Int
 
   deliveries deliveries @relation(fields: [deliveries_id], references: [id])
@@ -192,10 +194,12 @@ model review {
 }
 
 model chats {
-  id         Int      @id @default(autoincrement())
-  message    String
-  user_id    Int
-  created_at DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  message      String
+  user_id      Int
+  admin_id     Int
+  chat_user_id Int
+  created_at   DateTime @default(now())
 
   user users @relation(fields: [user_id], references: [id])
 }

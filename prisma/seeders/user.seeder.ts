@@ -5,13 +5,14 @@ import bcrypt from 'bcryptjs';
 export const userSeeder = async () => {
   for(let i = 0; i < 10; i++) {
     const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(faker.internet.password(), salt);
+    const hashPassword = await bcrypt.hash("070409", salt);
 
     await prismaClient.users.create({
       data: {
         name: faker.person.fullName(),
-        username: faker.internet.username(),
+        username: `qiqi${i}`,
         password: hashPassword,
+        role: i === 0 ? 'admin' : 'user',
 
         address: {
           create: Array.from({ length: 3 }, () => ({

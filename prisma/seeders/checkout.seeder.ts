@@ -11,7 +11,7 @@ export const checkoutSeed = async () => {
     const randomAddress = faker.helpers.arrayElement(u.address)
     const selectedProducts = faker.helpers.arrayElements(product, 2)
 
-    const statusCheckout = faker.helpers.arrayElement(['success', 'cancel', 'pending'])
+    const statusCheckout = faker.helpers.arrayElement(["pending", "processing", "success", "failed"])
 
     const productCheckoutData = selectedProducts.map((product) => {
       const randomQuantity = faker.number.int({ min: 1, max: 5 })
@@ -54,7 +54,7 @@ export const checkoutSeed = async () => {
           create: productCheckoutData,
         },
 
-        ...(statusCheckout === 'success' && {
+        ...(statusCheckout === 'processing' && {
           delivery: {
             create: {
               send_start_time: faker.date.future(),
