@@ -8,6 +8,7 @@ import addressRoute from './routes/address.route';
 import productRouter from './routes/product.route';
 import categoryRoute from './routes/category.route';
 import reviewRoute from './routes/review.route';
+import bannerRoute from './routes/banner.route';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/account/address', addressRoute);
 app.use('/api/product', productRouter);
 app.use('/api/product', reviewRoute);
 app.use('/api/category', categoryRoute);
+app.use('/api/banner', bannerRoute)
 
 app.use(errorMiddleware);
 
