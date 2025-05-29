@@ -27,10 +27,16 @@ enum Size {
   XXL
 }
 
+enum Type {
+  reguler
+  custom
+}
+
 enum Status {
-  pending
-  success
-  cancel
+  pending 
+  processing 
+  success 
+  failed
 }
 
 model users {
@@ -42,6 +48,8 @@ model users {
 
   address  addresses[]
   checkout checkouts[]
+  chats    chats[]
+  review   review[]
 }
 
 model addresses {
@@ -58,22 +66,23 @@ model addresses {
 }
 
 model products {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String
   quantity    Int
   price       Int
   weight      Int
-  size        Size
+  created_at  DateTime @default(now())
 
   product_images   product_images[]
   product_category product_category[]
-  checkout         checkouts[]
+  product_size     product_size[]
+  product_checkout product_checkout[]
+  review           review[]
 }
 
 model product_images {
   id         Int    @id @default(autoincrement())
-  image      String
   image_path String
   product_id Int
 
@@ -91,33 +100,106 @@ model product_category {
 
 model categories {
   id       Int    @id @default(autoincrement())
-  category String
+  category String @unique
 
   product_category product_category[]
 }
 
-model checkouts {
-  id         Int      @id @default(autoincrement())
-  status     Status   @default(pending)
-  quantity   Int
-  user_id    Int
-  address_id Int
+model product_size {
+  id         Int @id @default(autoincrement())
   product_id Int
-  created_at DateTime @default(now())
+  size_id    Int
 
-  delivery deliveries?
+  product products @relation(fields: [product_id], references: [id])
+  size    size     @relation(fields: [size_id], references: [id])
+}
+
+model size {
+  id           Int            @id @default(autoincrement())
+  size         Size           @unique
+  product_size product_size[]
+}
+
+model product_checkout {
+  id             Int             @id @default(autoincrement())
+  quantity       Int
+  size           Size
+  color          String
+  type           Type
+  price          Int
+  product_id     Int
+  checkout_id    Int
+  product_custom product_custom?
+
+  product  products  @relation(fields: [product_id], references: [id])
+  checkout checkouts @relation(fields: [checkout_id], references: [id])
+}
+
+model product_custom {
+  id               Int    @id @default(autoincrement())
+  front_image_path String
+  back_image_path  String
+  front_width      Int
+  back_width       Int
+  product_id       Int    @unique
+
+  custom product_checkout @relation(fields: [product_id], references: [id])
+}
+
+model checkouts {
+  id          Int      @id @default(autoincrement())
+  order_id    String   @unique
+  status      Status   @default(pending)
+  total_price Int
+  user_id     Int
+  address_id  Int
+  snap_token String?
+  created_at  DateTime @default(now())
+
+  product_checkout product_checkout[]
+  delivery         deliveries?
 
   user    users     @relation(fields: [user_id], references: [id])
   address addresses @relation(fields: [address_id], references: [id])
-  product products  @relation(fields: [product_id], references: [id])
 }
 
 model deliveries {
   id              Int      @id @default(autoincrement())
-  order_id        String   @unique
-  send_start_time DateTime
-  send_end_time   DateTime
+  send_start_time DateTime?
+  send_end_time   DateTime?
   checkout_id     Int      @unique
+  status          delivery_status[]
 
   checkout checkouts @relation(fields: [checkout_id], references: [id])
+}
+
+model delivery_status {
+  id            Int    @id @default(autoincrement())
+  status        String?
+  deliveries_id Int
+
+  deliveries deliveries @relation(fields: [deliveries_id], references: [id])
+}
+
+model review {
+  id         Int      @id @default(autoincrement())
+  star       Int
+  comment    String
+  user_id    Int
+  product_id Int
+  created_at DateTime @default(now())
+
+  user    users    @relation(fields: [user_id], references: [id])
+  product products @relation(fields: [product_id], references: [id])
+}
+
+model chats {
+  id           Int      @id @default(autoincrement())
+  message      String
+  user_id      Int
+  admin_id     Int
+  chat_user_id Int
+  created_at   DateTime @default(now())
+
+  user users @relation(fields: [user_id], references: [id])
 }
