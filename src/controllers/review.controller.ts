@@ -4,24 +4,6 @@ import { ErrorCode } from '../exceptions/http.exception';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import { AuthRequest } from '../types/AuthRequest';
 
-export const getAllReview = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const productId = parseInt(req.params.productId);
-    const review = await prismaClient.review.findMany({
-      where: { product_id: productId },
-      include: {
-        user: {
-          select: { id: true, name: true, username: true },
-        },
-      },
-    });
-
-    res.json({ success: true, data: review });
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getReviewByUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user;
