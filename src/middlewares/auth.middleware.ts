@@ -35,13 +35,6 @@ const authorize = async (req: AuthRequest, res: Response, next: NextFunction) =>
   }
 };
 
-const restrictToSelf = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  if ( req.user?.role !== 'admin' && req.user?.id !== parseInt(req.params.user_id)) {
-    return res.status(403).json({ message: 'Forbidden: You can only access your own account' });
-  }
-  next();
-};
-
 const adminAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Forbidden: Admin access only' });
@@ -50,4 +43,4 @@ const adminAuth = async (req: AuthRequest, res: Response, next: NextFunction) =>
 };
 
 
-export { authorize, restrictToSelf, adminAuth };
+export { authorize, adminAuth };

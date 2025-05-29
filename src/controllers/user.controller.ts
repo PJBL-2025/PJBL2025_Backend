@@ -3,6 +3,7 @@ import { BadRequestException, ErrorCode } from '../exceptions/http.exception';
 import { UnprocessableEntry } from '../exceptions/validation.exception';
 import bcrypt from 'bcryptjs';
 import { prismaClient } from '../utils/db';
+import { AuthRequest } from '../types/AuthRequest';
 
 export const getAllUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -20,19 +21,21 @@ export const getAllUser = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const getOneUser = async (req: Request, res: Response, next: NextFunction) => {
+export const getOneUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.user_id);
-    if (isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
-    }
+    const userId = req.user?.id;
 
     const user = await prismaClient.users.findUnique({
       where: { id: userId },
       select: {
         name: true,
         username: true,
-        address: true,
+        address: {
+          omit: {
+            id: true,
+            user_id: true,
+          },
+        },
       },
     });
 
@@ -46,14 +49,10 @@ export const getOneUser = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.user_id);
+    const userId = req.user?.id;
     const { name, username, password } = req.body;
-
-    if (isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
-    }
 
     if (username) {
       const user = await prismaClient.users.findFirst({

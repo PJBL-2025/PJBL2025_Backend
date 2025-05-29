@@ -9,6 +9,9 @@ export const getAddressByUser = async (req: AuthRequest, res: Response, next: Ne
     const userId = req.user;
     const address = await prismaClient.addresses.findMany({
       where: { user_id: userId?.id },
+      omit: {
+        user_id: true,
+      },
     });
 
     if (!address || address.length === 0) {

@@ -8,14 +8,49 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
     const products = await prismaClient.products.findMany({
       include: {
         product_category: {
-          include: { category: true },
+          select: {
+            category: {
+              select: {
+                category: true,
+              },
+            },
+          },
         },
         product_images: true,
-        review: true,
+        review: {
+          omit: {
+            id: true,
+            product_id: true,
+          },
+        },
+        product_checkout: true,
+      },
+      omit: {
+        description: true,
+        weight: true,
+        quantity: true,
+        created_at: true,
       },
     });
 
-    res.json({ success: true, products: products });
+    const formattedResponse = products.map((product) => {
+      const imageArray = product?.product_images.map(img => img.image_path);
+      const reviewArray = product?.review.map((review) => review.star);
+
+      const avgRating = reviewArray.length > 0 ? Math.round(reviewArray.reduce((total, num) => total + num, 0 ) / reviewArray.length * 10) / 10 : 0;
+
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        product_images: imageArray[0],
+        star: avgRating,
+        seller: product?.product_checkout.length,
+        product_category: product?.product_category.map(pc => pc.category.category),
+      };
+    });
+
+    res.json({ success: true, products: formattedResponse });
   } catch (err) {
     next(err);
   }
@@ -29,14 +64,37 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
       where: { id: productId },
       include: {
         product_category: {
-          include: { category: true },
+          select: {
+            category: {
+              select: {
+                category: true,
+              },
+            },
+          },
         },
         product_images: true,
-        review: true,
+        product_size: {
+          select: {
+            size: true,
+          },
+        },
+        review: {
+          omit: {
+            id: true,
+            product_id: true,
+          },
+        },
       },
     });
 
-    res.json({ success: true, products: products });
+    const formattedCategory = {
+      ...products,
+      product_images: products?.product_images.map(img => img.image_path),
+      product_category: products?.product_category.map(pc => pc.category.category),
+      product_size: products?.product_size.map(sz => sz.size.size),
+    };
+
+    res.json({ success: true, products: formattedCategory });
   } catch (err) {
     next(err);
   }
