@@ -33,11 +33,15 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
       },
     });
 
-    const formattedResponse = products.map((product) => {
-      const imageArray = product?.product_images.map(img => img.image_path);
-      const reviewArray = product?.review.map((review) => review.star);
+    if (!products) {
+      return res.status(404).json({ success: false, message: 'Produk tidak diteemukan' });
+    }
 
-      const avgRating = reviewArray.length > 0 ? Math.round(reviewArray.reduce((total, num) => total + num, 0 ) / reviewArray.length * 10) / 10 : 0;
+    const formattedResponse = products.map((product) => {
+      const imageArray = product.product_images.map(img => img.image_path);
+      const reviewArray = product.review.map((review) => review.star);
+
+      const avgRating = reviewArray.length > 0 ? Math.round(reviewArray.reduce((total, num) => total + num, 0) / reviewArray.length * 10) / 10 : 0;
 
       return {
         id: product.id,
@@ -45,8 +49,8 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
         price: product.price,
         product_images: imageArray[0],
         star: avgRating,
-        seller: product?.product_checkout.length,
-        product_category: product?.product_category.map(pc => pc.category.category),
+        sold: product.product_checkout.length,
+        product_category: product.product_category.map(pc => pc.category.category),
       };
     });
 
@@ -87,11 +91,24 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
       },
     });
 
+    const productCheckout = await prismaClient.product_checkout.findMany({
+      where: { product_id: productId },
+    });
+
+    if (!products) {
+      return res.status(404).json({ success: false, message: 'Produk tidak diteemukan' });
+    }
+
+    const reviewArray = products.review.map((review) => review.star);
+    const avgRating = reviewArray.length > 0 ? Math.round(reviewArray.reduce((total, num) => total + num, 0) / reviewArray.length * 10) / 10 : 0;
+
     const formattedCategory = {
       ...products,
-      product_images: products?.product_images.map(img => img.image_path),
-      product_category: products?.product_category.map(pc => pc.category.category),
-      product_size: products?.product_size.map(sz => sz.size.size),
+      product_images: products.product_images.map(img => img.image_path),
+      star: avgRating,
+      sold: productCheckout?.length || 0,
+      product_category: products.product_category.map(pc => pc.category.category),
+      product_size: products.product_size.map(sz => sz.size.size),
     };
 
     res.json({ success: true, products: formattedCategory });

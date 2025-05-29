@@ -15,7 +15,7 @@ export const getAllUser = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    res.json({ status: 'success', data: users });
+    res.json({ success: true, data: users });
   } catch (err) {
     next(err);
   }
@@ -43,7 +43,7 @@ export const getOneUser = async (req: AuthRequest, res: Response, next: NextFunc
       return next(new BadRequestException('User does not exist', ErrorCode.USER_NOT_FOUND));
     }
 
-    res.json({ status: 'success', data: user });
+    res.json({ success: true, data: user });
   } catch (err) {
     next(err);
   }
@@ -76,7 +76,7 @@ export const updateUser = async (req: AuthRequest, res: Response, next: NextFunc
       data: updatedData,
     });
 
-    res.json({ status: 'success', message: 'data user berhasil di edit' });
+    res.json({ success: true, message: 'data user berhasil di edit' });
   } catch (err: any) {
     next(new UnprocessableEntry(err.cause?.issues || err.message, 'Unprossable Entry', ErrorCode.UNPROCESSABLE_ENTITY));
   }

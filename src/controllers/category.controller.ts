@@ -86,12 +86,12 @@ export const getOneCategory = async (req: Request, res: Response, next: NextFunc
         price: product.price,
         product_images: imageArray[0],
         star: avgRating,
-        seller: product?.product_checkout.length,
+        sold: product?.product_checkout.length,
         product_category: product?.product_category.map(pc => pc.category.category),
       };
     });
 
-    res.json({ success: true, data: formattedProduct });
+    res.json({ success: true, category: category, data: formattedProduct });
   } catch (err: any) {
     next(err);
   }
