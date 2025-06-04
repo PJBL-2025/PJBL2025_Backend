@@ -3,7 +3,7 @@ import {
   createProduct,
   deleteProduct,
   getAllProduct,
-  getOneProduct,
+  getOneProduct, getSearchProduct,
   updateProduct,
 } from '../controllers/product.controller';
 import { adminAuth, authorize } from '../middlewares/auth.middleware';
@@ -23,6 +23,7 @@ const storage =  multer.diskStorage({
 const upload = multer({ storage });
 
 productRouter.get('/', getAllProduct);
+productRouter.get('/search', getSearchProduct);
 productRouter.get('/:id', getOneProduct);
 productRouter.post('/', authorize, adminAuth, upload.array('product', 5), createProduct);
 productRouter.patch('/:id', authorize, adminAuth, updateProduct);

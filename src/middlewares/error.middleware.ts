@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from 'express';
 
 export const errorMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
   try {
-    return res.status(error.statusCode).json({
+    return res.status(error.statusCode || 500).json({
+      success: false,
       message: error.message || 'Internal Server Error',
       errorCode: error.errorCode || null,
       errors: error.errors || null,

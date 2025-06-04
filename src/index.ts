@@ -22,7 +22,7 @@ app.use('/api/account/address', addressRoute);
 app.use('/api/product', productRouter);
 app.use('/api/product', reviewRoute);
 app.use('/api/category', categoryRoute);
-app.use('/api/banner', bannerRoute)
+app.use('/api/banner', bannerRoute);
 
 app.use(errorMiddleware);
 

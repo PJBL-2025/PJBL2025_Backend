@@ -33,7 +33,7 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
       },
     });
 
-    if (!products) {
+    if (products.length === 0) {
       return res.status(404).json({ success: false, message: 'Produk tidak diteemukan' });
     }
 
@@ -55,6 +55,74 @@ export const getAllProduct = async (req: Request, res: Response, next: NextFunct
     });
 
     res.json({ success: true, products: formattedResponse });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getSearchProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = req.query.query;
+
+    if (typeof query !== 'string' || query.trim() === '') {
+      return res.status(404).json({ success: false, message: 'Produk belum dicari' });
+    }
+
+    const products = await prismaClient.products.findMany({
+      where: {
+        name: {
+          contains: query.trim().toLowerCase(),
+        },
+      },
+      include: {
+        product_category: {
+          select: {
+            category: {
+              select: {
+                category: true,
+              },
+            },
+          },
+        },
+        product_images: true,
+        review: {
+          omit: {
+            id: true,
+            product_id: true,
+          },
+        },
+        product_checkout: true,
+      },
+      omit: {
+        description: true,
+        weight: true,
+        quantity: true,
+        created_at: true,
+      },
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ success: false, message: 'Produk tidak ditemukan' });
+    }
+
+    const formattedResponse = products.map((product) => {
+      const imageArray = product.product_images.map(img => img.image_path);
+      const reviewArray = product.review.map((review) => review.star);
+
+      const avgRating = reviewArray.length > 0 ? Math.round(reviewArray.reduce((total, num) => total + num, 0) / reviewArray.length * 10) / 10 : 0;
+
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        product_images: imageArray[0],
+        star: avgRating,
+        sold: product.product_checkout.length,
+        product_category: product.product_category.map(pc => pc.category.category),
+      };
+    });
+
+    res.json({ success: true, query: query, products: formattedResponse });
   } catch (err) {
     next(err);
   }
@@ -96,7 +164,7 @@ export const getOneProduct = async (req: Request, res: Response, next: NextFunct
     });
 
     if (!products) {
-      return res.status(404).json({ success: false, message: 'Produk tidak diteemukan' });
+      return res.status(404).json({ success: false, message: 'Produk tidak ditemukan' });
     }
 
     const reviewArray = products.review.map((review) => review.star);
